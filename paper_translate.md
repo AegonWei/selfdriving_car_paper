@@ -19,5 +19,9 @@
 ###### A.路径规划
 路径规划生成可行路径，低级控制器可以轻松遵循这些路径并遵守环境约束。 因此，我们开发了基于状态空间轨迹生成方法的路径规划算法。
 首先，我们应用自适应采样算法[4]，根据道路几何形状自适应地采样终端状态（即位置坐标，标题，曲率）。 然后，基于模型预测生成方法[13]生成从初始状态设置的运动学可行路径。 我们利用车辆运动学模型作为预测运动模型。 约束可写为Xf = f（Xi，u），其中Xi是初始状态，Xf是终端状态。 函数f（）是车辆运动学模型，可以用以下公式表示：
-<img src="http://latex.codecogs.com/gif.latex?\begin{equation}\dot{x}=v*\cos\theta \\ \dot{y}=v*\sin\theta \\ \dot{theta}=\kappa*v \\ \dot{\kappa}=u \end{equation}" />
+<img src="http://latex.codecogs.com/gif.latex?\begin{equation}\dot{x}=v*\cos\theta \\ 
+\dot{y}=v*\sin\theta \\ 
+\dot{theta}=\kappa*v \\ 
+\dot{\kappa}=u 
+\end{equation}" />
 
