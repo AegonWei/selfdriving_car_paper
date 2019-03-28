@@ -36,6 +36,5 @@ Vmax = inf {Vmal，Vmlat，Vmlon}（2）
 其中最大允许速度（Vmal）由高级行为推理模块估算。最大横向速度（Vmlat）被约束以防止车辆的侧滑并且与道路的曲率和最大横向加速度相关：V^2_{mlat} |κ|≤Accmlat。最大纵向速度（Vmlon）受以下等式限制：（V^2_{mlon}）/（2Decmlon）+Dsafe≤sf，其中Decmlon是最大纵向减速度; Dsafe是安全制动距离;和sf是候选路径的长度。
 
 然后，我们设计生成路径长度的单变量函数（3）来计算Vdesire∈[0，Vmax]。
-![](http://latex.codecogs.com/gif.latex?V_{desire} = \\begin{cases}\\frac{2V_{max}}{1+exp(D_{safe}-s)} - V_{max}, &\\mathrm{if}\\ s \\geq D_{safe}\\\
-0, & \\mathrm{if}\\ s < D_{safe})
+![](http://latex.codecogs.com/gif.latex?V_{desire} = \\begin{cases}\\frac{2V_{max}}{1+exp(D_{safe}-s)} -V_{max},&\\mathrm{if}\\ s \\geq D_{safe}\\\ 0, & \\mathrm{if}\\ s < D_{safe})
 
