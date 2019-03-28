@@ -28,6 +28,21 @@
 ![State space sampling](https://github.com/AegonWei/selfdriving_car_paper/blob/master/images/Trajectory%20Planning%20for%20Autonomous%20Ground%20Vehicles%20Driving%20in%20Structured%20Environments/State%20space%20sampling.gif)
 B.分段螺旋曲线路径生成方法
 在本文中，生成的路径的航向角是路径长度的分段立方函数。 如图2所示，对于两点：PI（xI，yI，θI），PT（xT，yT，θT），如果α1=α2，我们将这两个点定义为对称配置。 根据螺旋曲线的性质，两点是对称配置，我们可以用螺旋连接两点：
-![equation1]()
+![equation1](https://github.com/AegonWei/selfdriving_car_paper/blob/master/images/Trajectory%20Planning%20for%20Autonomous%20Ground%20Vehicles%20Driving%20in%20Structured%20Environments/%E9%80%89%E5%8C%BA_001.bmp)
+其中l是曲线的长度，κ（s）是曲率，d是两点之间的直线距离，α=θT-θI。
+
+如果给定的两点PI和PT不是对称配置，我们不能使用螺旋直接连接两个点。 我们需要找到一个中间点O.它分别使PIO和PT Oare对称配置。
+
+当θI=θT时，中间点集合为：
+\begin{equation*}
+U1=\{(x,y)\vert (x-x_{I})(y-y_{I})=(x-x_{T})(y-y_{T})\}
+\tag{2}
+\end{equation*}
+当θI≠θT时，中间点集合为：
+\begin{align*}
+U2=\{(x,y)\vert (x-x_{I})(x-x_{T})+(y-y_{I})(y-y_{T})*\\
+\ \ \ \ \tan(\frac{\theta_{T}-\theta_{I}}{2})=(x-x_{I})(y-y_{T})-(x-x_{T})(y-y_{I})\}
+\tag{3}\end{align*}
+
 
 
