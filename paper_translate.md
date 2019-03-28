@@ -19,8 +19,29 @@
 ###### A.路径规划
 路径规划生成可行路径，低级控制器可以轻松遵循这些路径并遵守环境约束。 因此，我们开发了基于状态空间轨迹生成方法的路径规划算法。
 首先，我们应用自适应采样算法[4]，根据道路几何形状自适应地采样终端状态（即位置坐标，标题，曲率）。 然后，基于模型预测生成方法[13]生成从初始状态设置的运动学可行路径。 我们利用车辆运动学模型作为预测运动模型。 约束可写为Xf = f（Xi，u），其中Xi是初始状态，Xf是终端状态。 函数f（）是车辆运动学模型，可以用以下公式表示：
-<img src="http://latex.codecogs.com/gif.latex?\dot{x}=v*\cos\theta" />
-![](http://latex.codecogs.com/gif.latex?\\dot{y}=v*\\sin\\theta) 
-![](http://latex.codecogs.com/gif.latex?\\dot{\\theta}=\\kappa*v ) 
-![](http://latex.codecogs.com/gif.latex?\\dot{\\kappa}=u ) 
+<img src="http://latex.codecogs.com/gif.latex?\dot{x}=v*\cos\theta" /> <br>
+![](http://latex.codecogs.com/gif.latex?\\dot{y}=v*\\sin\\theta) <br>
+![](http://latex.codecogs.com/gif.latex?\\dot{\\theta}=\\kappa*v ) <br>
+![](http://latex.codecogs.com/gif.latex?\\dot{\\kappa}=u ) <br>
+其中（x，y）是位置坐标，θ是前进，κ是曲率，v是车速，u是转向控制。<br>
+众所周知，连续曲率可以保证路径的平滑性，避免不稳定的转向动作。 因此，曲率表示为弧长的多项式函数，以确保每个路径曲率的连续性。 为了获得唯一的解决方案，κ（s）中的未知参数的数量必须等于有用的已知条件的数量。 注意，初始曲率κ（0）确定零阶参数α=κ（0）。 剩下的其他有用条件是终端状态和初始位置。 因此，采用变量s的三次多项式函数。 未知参数涉及q = [b，c，d，sf]。<br>
+由于获得这种强非线性微分方程的解析解是非常重要的，因此我们使用New-ton的方法在数值上求解方程。 具体地，通过找到误差的最小值（ΔXf（q））来迭代地计算未知参数。
+
+作为非线性优化问题，对未知参数q0的初始猜测可以极大地影响迭代的收敛。 因此，受[14]的工作启发，我们提出了一个预先计算的查找表，用于存储未知参数的初始猜测。 如图3所示，我们采样几个最终状态，然后根据车身中心坐标框架生成相应的路径。 这些生成的路径的参数被存储为初始猜测。<br>
+##### B.速度规划
+本小节讨论速度规划算法。首先，我们计算了所需速度的最大速度限制。然后，通过呈现的函数获得期望的速度。最后，设计了可由速度控制器（即节流阀/制动器）执行的速度曲线。请注意，需要设计速度曲线，因为我们的AGV具有运动规划器和控制器的集成框架。
+
+为确保安全，我们设定了最大速度限制（Vmax），该限制由以下三个方面决定：
+Vmax = inf {Vmal，Vmlat，Vmlon}（2）
+其中最大允许速度（Vmal）由高级行为推理模块估算。最大横向速度（Vmlat）被约束以防止车辆的侧滑并且与道路的曲率和最大横向加速度相关：V^2_{mlat} |κ|≤Accmlat。最大纵向速度（Vmlon）受以下等式限制：（V^2_{mlon}）/（2Decmlon）+Dsafe≤sf，其中Decmlon是最大纵向减速度; Dsafe是安全制动距离;和sf是候选路径的长度。
+
+然后，我们设计生成路径长度的单变量函数（3）来计算Vdesire∈[0，Vmax]。
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default">
+\begin{equation*}
+V_{desire} = \begin{cases}
+\frac{2V_{max}}{1+exp(D_{safe}-s)} - V_{max}, & \mathrm{if}\ s \geq D_{safe}\\
+0, & \mathrm{if}\ s < D_{safe}.
+\end{cases}\tag{3}
+\end{equation*}
+                               </script>
 
