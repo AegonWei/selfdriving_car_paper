@@ -438,9 +438,11 @@ ComparableCost TrajectoryCost::Calculate(const QuinticPolynomialCurve1d &curve,
 ComparableCost TrajectoryCost::CalculatePathCost(
     const QuinticPolynomialCurve1d &curve, const float start_s,
     const float end_s, const uint32_t curr_level, const uint32_t total_level) {
-  for (float curve_s = 0.0; curve_s < (end_s - start_s); curve_s += config_.path_resolution()) { // path_resolution: 1.0m，每1m采样一个点
+  for (float curve_s = 0.0; curve_s < (end_s - start_s); curve_s += config_.path_resolution()) { 
+  // path_resolution: 1.0m，每1m采样一个点
     const float l = curve.Evaluate(0, curve_s);  // 根据拟合的5次多项式，计算该点的侧方距离
-    path_cost += l * l * config_.path_l_cost() * quasi_softmax(std::fabs(l));    // A. 侧方距离l开销，path_l_cost：6.5
+    path_cost += l * l * config_.path_l_cost() * quasi_softmax(std::fabs(l));    
+    // A. 侧方距离l开销，path_l_cost：6.5
 
     double left_width = 0.0;
     double right_width = 0.0;
@@ -460,7 +462,8 @@ ComparableCost TrajectoryCost::CalculatePathCost(
 
   if (curr_level == total_level) {
     const float end_l = curve.Evaluate(0, end_s - start_s);
-    path_cost += std::sqrt(end_l - init_sl_point_.l() / 2.0) * config_.path_end_l_cost(); // path_end_l_cost：10000
+    path_cost += std::sqrt(end_l - init_sl_point_.l() / 2.0) * config_.path_end_l_cost(); 
+    // path_end_l_cost：10000
   }
   cost.smoothness_cost = path_cost;
 }
@@ -529,7 +532,8 @@ ComparableCost TrajectoryCost::CalculateDynamicObstacleCost(
     const float end_s) const {
   ComparableCost obstacle_cost;
   float time_stamp = 0.0;
-  for (size_t index = 0; index < num_of_time_stamps_;           // 障碍物每隔eval_time_interval(默认0.1s)会得到一个运动坐标，分别计算对所有时间点坐标的cost
+  for (size_t index = 0; index < num_of_time_stamps_;           
+  // 障碍物每隔eval_time_interval(默认0.1s)会得到一个运动坐标，分别计算对所有时间点坐标的cost
        ++index, time_stamp += config_.eval_time_interval()) {
     common::SpeedPoint speed_point;
     heuristic_speed_data_.EvaluateByTime(time_stamp, &speed_point);
@@ -650,7 +654,7 @@ Status EMPlanner::Plan(const TrajectoryPoint& planning_start_point, Frame* frame
 Status EMPlanner::PlanOnReferenceLine(
     const TrajectoryPoint& planning_start_point, Frame* frame,
     ReferenceLineInfo* reference_line_info) {
-  for (auto& optimizer : tasks_) {               // 对每条参考线分别进行所有任务的规划，包括速度规划、路径位置规划、位置决策器规划等。
+  for (auto& optimizer : tasks_) {  // 对每条参考线分别进行所有任务的规划，包括速度规划、路径位置规划、位置决策器规划等。
     ret = optimizer->Execute(frame, reference_line_info);
   }
 }
@@ -704,8 +708,8 @@ for (int i = 0; i < trajectory.trajectory_point_size(); ++i) {
         const auto curr_adc_path_point =                                     // 计算采样点的累计距离s
             discretized_path.EvaluateUsingLinearApproximation(
                 path_s + discretized_path.StartPoint().s());
-        if (CheckOverlap(curr_adc_path_point, obs_box,                       // 确认障碍物和无人车在该时间点是够有重叠，如果没有重叠，就可以忽略该时间点的障碍物
-                         st_boundary_config_.boundary_buffer())) {
+        if (CheckOverlap(curr_adc_path_point, obs_box,                 // 确认障碍物和无人车在该时间点是够有重叠，
+                         st_boundary_config_.boundary_buffer())) {     // 如果没有重叠，就可以忽略该时间点的障碍物
           // found overlap, start searching with higher resolution
           const double backward_distance = -step_length;                     // 下界初始距离
           const double forward_distance = vehicle_param_.length() +          // 上节初始距离
@@ -719,8 +723,8 @@ for (int i = 0; i < trajectory.trajectory_point_size(); ++i) {
           while (low_s < high_s) {
             ...
           if (find_high && find_low) {
-            lower_points->emplace_back(          // 加入下界信息，对应在参考线上的累计距离s，和相对时间t(障碍物轨迹相对时间)
-                low_s - st_boundary_config_.point_extension(),
+            lower_points->emplace_back(          // 加入下界信息，对应在参考线上的累计距离s，
+                low_s - st_boundary_config_.point_extension(), // 和相对时间t(障碍物轨迹相对时间)
                 trajectory_point_time);
             upper_points->emplace_back(
                 high_s + st_boundary_config_.point_extension(),
@@ -1274,15 +1278,15 @@ for (uint32_t i = 0; i < num_evaluated_t; ++i) {
 uint32_t prev_spline_index = FindIndex(x_coord[0]);
 double prev_rel_x = x_coord[0] - x_knots_[prev_spline_index];
 std::vector<double> prev_coef;
-GeneratePowerX(prev_rel_x, num_params, &prev_coef);             // 前一个点的多项式系数[1, x0, x0^2, x0^3, x0^4, x0^5]
+GeneratePowerX(prev_rel_x, num_params, &prev_coef);         // 前一个点的多项式系数[1, x0, x0^2, x0^3, x0^4, x0^5]
 for (uint32_t i = 1; i < x_coord.size(); ++i) {
   uint32_t cur_spline_index = FindIndex(x_coord[i]);            // 寻找当前点所在段
-  double cur_rel_x = x_coord[i] - x_knots_[cur_spline_index];   // 相对时间减去所在段的首knots时间，就可以得到自变量的范围[0,2]
-  std::vector<double> cur_coef;
+  double cur_rel_x = x_coord[i] - x_knots_[cur_spline_index];   // 相对时间减去所在段的首knots时间，
+  std::vector<double> cur_coef;                                 // 就可以得到自变量的范围[0,2] 
 
-  GeneratePowerX(cur_rel_x, num_params, &cur_coef);             // 后一个点的多项式系数[1, x1, x1^2, x1^3, x1^4, x1^5]
+  GeneratePowerX(cur_rel_x, num_params, &cur_coef);          // 后一个点的多项式系数[1, x1, x1^2, x1^3, x1^4, x1^5]
   // if constraint on the same spline
-  if (cur_spline_index == prev_spline_index) {                  // 同一个段函数内，直接相减即可，使用同一阻系数[ai_0, ai_1, ai_2, ai_3, ai_4, ai_5]
+  if (cur_spline_index == prev_spline_index) { // 同一个段函数内，直接相减即可，使用同一阻系数[ai_0, ai_1, ai_2, ai_3, ai_4, ai_5]
     for (uint32_t j = 0; j < cur_coef.size(); ++j) {
       inequality_constraint(i - 1, cur_spline_index * num_params + j) =
             cur_coef[j] - prev_coef[j];
@@ -1396,7 +1400,8 @@ bool Spline1dKernel::AddReferenceLineKernelMatrix(
 
     for (uint32_t r = 0; r < num_params; ++r) {
       for (uint32_t c = 0; c < num_params; ++c) {
-        ref_kernel(r, c) = 2.0 * power_x[r + c];        // T^TT = ref_kernel = [1, t, t^2, t^3, t^4, t^5]^t · [1, t, t^2, t^3, t^4, t^5]
+        ref_kernel(r, c) = 2.0 * power_x[r + c];        
+        // T^TT = ref_kernel = [1, t, t^2, t^3, t^4, t^5]^t · [1, t, t^2, t^3, t^4, t^5]
       }
     }
 
@@ -1525,13 +1530,13 @@ bool ReferenceLineInfo::CombinePathAndSpeedProfile(
     if (speed_point.s() > path_data_.discretized_path().Length()) {
       break;
     }
-    common::PathPoint path_point;                               // 使用速度点的相对累计距离去查询规划路径，得到对应的映射点
+    common::PathPoint path_point;                       // 使用速度点的相对累计距离去查询规划路径，得到对应的映射点
     if (!path_data_.GetPathPointWithPathS(speed_point.s(), &path_point)) {
       AERROR << "Fail to get path data with s " << speed_point.s()
              << "path total length " << path_data_.discretized_path().Length();
       return false;
     }
-    path_point.set_s(path_point.s() + start_s);     // 加上起始点距离，变成"绝对"累积距离(实际上还是相对于参考线起始点的距离)
+    path_point.set_s(path_point.s() + start_s); // 加上起始点距离，变成"绝对"累积距离(实际上还是相对于参考线起始点的距离)
 
     common::TrajectoryPoint trajectory_point;      // 最后结合三者，可以生成一个新的完整路径点
     trajectory_point.mutable_path_point()->CopyFrom(path_point);
